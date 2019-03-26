@@ -4,7 +4,7 @@ n = length(list_edges);
 H = nextperm(n,n);
 H();
 % reversal = perms(a);
-% vertex = reversal(end, :); %последовательность 1 2 3 ... n
+% vertex = reversal(end, :); %РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚СЊ 1 2 3 ... n
 vertex = 1:n;
 len_rev = factorial(n) - 1;
 itog_sigma(1, :) = vertex;
