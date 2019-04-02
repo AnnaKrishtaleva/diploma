@@ -1,4 +1,4 @@
-function[] = lin_notation(I, E, G, Adj, f)
+function[] = lin_notation(I_n, I_e, G, Adj, f)
 if (f == 0)
     Nn = sum(sum(Adj))/2;
 else
@@ -9,10 +9,10 @@ fid = fopen('notation.txt', 'w');
 if fid == -1 
     error('File is not opened'); 
 end 
-I1 = I;
-v_e = zeros(1, length(I)); %множество исключенных вершин
-v_r = zeros(1, length(I)); %множество временно замененных вершин
-index_v_r = zeros(1, length(I));
+I1 = I_n;
+v_e = zeros(1, length(I_n)); %множество исключенных вершин
+v_r = zeros(1, length(I_n)); %множество временно замененных вершин
+index_v_r = zeros(1, length(I_n));
 %скобки для записи в нотацию
 var1 = '[';
 var2 = ']';
@@ -29,13 +29,13 @@ fprintf(fid, '%d', index);
 fprintf(fid, '%s', var1);
 % fprintf(fid,'%s', var3);
 %помещаем вершину в v_r и присваиваем ей спец код
-[k, m] = find(I == index);
+[k, m] = find(I_n == index);
 adj_v1 = m(1);
 v_r(1, 1) = m(1);
 vertex = m(1);
 index_v_r(1, 1) = 1;
 kk = 2;
-test_v_e = ones(1, length(I));
+test_v_e = ones(1, length(I_n));
 while (1)
      if (test_v_e & v_e)
          break;
@@ -48,12 +48,12 @@ while (1)
     else
         v_v = neighbors(G, vertex);
     end
-    [min_v1, flag1, min_ind1, min_v2, flag2, min_ind2] = min_find(vertex, v_v, Matrix_adj, I);
+    [min_v1, flag1, min_ind1, min_v2, flag2, min_ind2] = min_find(vertex, v_v, Matrix_adj, I_n);
     if (flag2 == 0 && flag1 == 0)
         temp_vertex = 0;
     elseif (flag1 ~= 0 && flag2 == 0 && Matrix_adj(vertex, min_v1) ~= 0)
         temp_vertex = min_v1;
-        ind = I(min_v1);
+        ind = I_n(min_v1);
         I1(min_v1) = 0;
     elseif (flag2 ~= 0 && flag1 ~= 0)
         if(min_v1 ~= min_v2)
@@ -61,18 +61,18 @@ while (1)
 %         temp_vertex = min(min_v1, min_v2);
             if (min_ind1 < min_ind2 && Matrix_adj(vertex, min_v1) ~= 0)
                 temp_vertex = min_v1;
-                ind = I(min_v1);
+                ind = I_n(min_v1);
                 I1(min_v1) = 0;
             
             elseif (min_ind2 < min_ind1 && Matrix_adj(vertex, min_v2) ~= 0)
                 temp_vertex = min_v2;
-                ind = I(min_v2);
+                ind = I_n(min_v2);
                 I1(min_v2) = 0;
             
             else
                 %индекс совпали -> ищем минимальный индекс ребра
                 v1 = min_v1; v2 = min_v2;
-                edges = E.edge;
+                edges = I_e.edge;
                 if (f == 0)
                     N = sum(sum(Adj))/2;
                 else
@@ -80,29 +80,29 @@ while (1)
                 end
                 num_node1 = 0; num_node2 = 0;
                 for i= 1:N
-                    edges = E(i).edge;
+                    edges = I_e(i).edge;
                     if (num_node1 ~= 0 && num_node2 ~= 0)
                         break;
                     end
                     if(edges(1, 1) == vertex && edges(1, 2) == v1 ||...
                         edges(1, 1) == v1 && edges(1, 2) == vertex)
-                        num_node1 = E(i).class_edge;
+                        num_node1 = I_e(i).class_edge;
                     end
                     if(edges(1, 1) == vertex && edges(1, 2) == v2 ||...
                         edges(1, 1) == v2 && edges(1, 2) == vertex)
-                        num_node2 = E(i).class_edge;
+                        num_node2 = I_e(i).class_edge;
                     end
                 end
                 if (num_node1 ~= num_node2)
                     %приоритет отдается вершине с меньшим индексом ребра
                         if (num_node1 < num_node2 && Matrix_adj(vertex, v1) ~= 0)
                             temp_vertex = v1;
-                            ind = I(v1);
+                            ind = I_n(v1);
                             I1(v1) = 0;
                         end
                         if (num_node2 < num_node1 && Matrix_adj(vertex, v2) ~= 0 )
                             temp_vertex = v2;
-                            ind = I(v2);
+                            ind = I_n(v2);
                             I1(v2) = 0;
                         end
                     else
@@ -125,11 +125,11 @@ while (1)
                         %kod == max_kod - условие отвечает за то, что если мы не
                         %различили вершины, берем любую - первую
                         temp_vertex = v1;
-                        ind = I(v1);
+                        ind = I_n(v1);
                         I1(v1) = 0;
                     elseif (Matrix_adj(vertex, v2) ~= 0)
                         temp_vertex = v2;
-                        ind = I(v2);
+                        ind = I_n(v2);
                         I1(v2) = 0;
                     end
                 end
@@ -146,7 +146,7 @@ while (1)
         if (f == 0)
             Matrix_adj(adj_v2, adj_v1) = Matrix_adj(adj_v2, adj_v1) - 1;
         end
-        class_node = find_class_node(E, Nn, adj_v1, adj_v2);
+        class_node = find_class_node(I_e, Nn, adj_v1, adj_v2);
         fprintf(fid, '%s', var4);
         fprintf(fid, '%d', class_node);
         fprintf(fid, '%s', var5);
@@ -169,7 +169,7 @@ while (1)
             if (f == 0)
                 Matrix_adj(vvv(j), temp_vertex) = Matrix_adj(vvv(j), temp_vertex) - 1;
             end
-            class_node = find_class_node(E, Nn, temp_vertex, vvv(j));
+            class_node = find_class_node(I_e, Nn, temp_vertex, vvv(j));
             fprintf(fid, '%s', var4);
             fprintf(fid, '%d', class_node);
             fprintf(fid, '%s', var5);
@@ -186,12 +186,12 @@ while (1)
       kk = kk-1;
       index_v_r(m) = 0;
       pp = 0;
-      for (i = 1:length(I))
+      for (i = 1:length(I_n))
         if (Matrix_adj(i, vertex) == 0 && Matrix_adj(vertex, i) == 0)
             pp = pp+ 1;
         end
       end
-      if (pp == length(I))
+      if (pp == length(I_n))
           v_e(vertex) = 1;
       end
       fprintf(fid, '%s', var2);
@@ -201,13 +201,13 @@ while (1)
       
       if ((adj_v1 == 0) && length(find(v_e == 0)) > 0)
         ver = find(v_e == 0);
-        index = min(I(ver));
+        index = min(I_n(ver));
         fprintf(fid, '%s', var7);
         fprintf(fid, '%d', index);
         fprintf(fid, '%s', var1);
         % fprintf(fid,'%s', var3);
         %помещаем вершину в v_r и присваиваем ей спец код
-        [k, m] = find(I == index);
+        [k, m] = find(I_n == index);
         for (i = 1:length(m))
             if (v_e(m(i)) == 0)
                 break;
