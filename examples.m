@@ -27,7 +27,7 @@ I_n = nodeindex(p_max)
 
 %% Нахождение индексов классов изоморфизма ребёр
 % [I_e, num_class_result] = edges_map_digraph(G.Edges.EndNodes, A_max, p_max(1, 1:end), I_n);
-I_e = edgeindex([s; t], I_n)
+I_e = edgeindex([s; t], I_n);
 
 %% Построение линейной нотации
 % lin_notation(I_n, I_e, G, A, 1)
